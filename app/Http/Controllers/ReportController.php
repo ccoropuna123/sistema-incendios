@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+// "Importamos" herramientas que vamos a usar más abajo
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+// Definimos la clase ReportController
 class ReportController extends Controller
 {
     // Muestra el formulario para crear un reporte
     public function create()
     {
+        // 'reports.create' significa: busca el archivo
         return view('reports.create');
     }
 
@@ -19,6 +22,7 @@ class ReportController extends Controller
     {
         // Validación básica
         $validated = $request->validate([
+            //  nullable: opcional y required es obligatorio
             'description' => 'nullable|string|max:1000',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
@@ -26,6 +30,7 @@ class ReportController extends Controller
         ]);
 
         // Crear el reporte
+        // Report::create() inserta una nueva fila en la tabla 'reports'
         Report::create([
             'user_id' => Auth::id(),
             'description' => $validated['description'],
@@ -34,7 +39,8 @@ class ReportController extends Controller
             'location_type' => $validated['location_type'],
             'status' => 'enviado',
         ]);
-
+        // Después de guardar, lo mandamos de vuelta al formulario
+        // y le mostramos un mensaje de éxito
         return redirect()
             ->route('reports.create')
             ->with('success', 'Reporte enviado correctamente.');
