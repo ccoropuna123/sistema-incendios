@@ -1,14 +1,19 @@
 <?php
-
+//direccion del archivo
 namespace App\Http\Controllers;
 
 // Modelo que representa la tabla de reportes
+//es como import , osea usa la clase report
+//sin escribir su ruta completa
 use App\Models\Report;
 
 // Permite recibir los datos enviados desde formularios
+//representa el formulario que el usuario envio
+//contiene otro 
 use Illuminate\Http\Request;
 
 // Permite obtener información del usuario que inició sesión
+//osea sus datos ingresados
 use Illuminate\Support\Facades\Auth;
 
 // Controlador encargado de la lógica relacionada con los reportes
@@ -23,8 +28,9 @@ class ReportController extends Controller
     | /reportes/crear
     |
     */
-    public function create()
-    {
+    public function create()//lo que hace aca es cuando el usuario hace 
+    {//click aca muestra el formulario 
+
         // Abre la vista resources/views/reports/create.blade.php
         return view('reports.create');
     }
@@ -38,6 +44,8 @@ class ReportController extends Controller
     | en la base de datos.
     |
     */
+    //cuando el usuario envia el formulario
+    //que en este caso lo recibe en $request
     public function store(Request $request)
     {
         /*
@@ -49,7 +57,7 @@ class ReportController extends Controller
         | datos tengan el formato correcto.
         |
         */
-
+        //si algo falla detiene todo 
         $validated = $request->validate([
 
             // La descripción es opcional
@@ -78,12 +86,14 @@ class ReportController extends Controller
         Report::create([
 
             // Usuario que realizó el reporte
+            //el auth ::id() devuelve el id del usuario que ingreso
             'user_id' => Auth::id(),
 
             // Descripción escrita por el ciudadano
             'description' => $validated['description'],
 
             // Coordenadas del incendio
+            //$validated solo contiene la validacion que ya paso
             'latitude' => $validated['latitude'],
             'longitude' => $validated['longitude'],
 
