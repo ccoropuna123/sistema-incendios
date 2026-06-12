@@ -92,8 +92,7 @@ class LoginRequest extends FormRequest
 
     //  Generar clave única para el rate limiter
     public function throttleKey(): string
-    {   
-        // Str::lower() = convierte email a minúsculas
+    {   // Str::lower() = convierte email a minúsculas
         // Str::transliterate() = convierte caracteres especiales (ñ, á, etc.)
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
     }
