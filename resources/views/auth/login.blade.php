@@ -1,4 +1,12 @@
 <x-guest-layout>
+    <div class="mb-6 text-center">
+        <h1 class="text-2xl font-bold text-gray-800">
+            Sistema de Reporte de Incendios
+        </h1>
+        <p class="text-sm text-gray-600 mt-1">
+            Inicia sesión para enviar o revisar reportes.
+        </p>
+    </div>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
