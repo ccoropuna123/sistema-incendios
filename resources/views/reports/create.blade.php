@@ -48,12 +48,13 @@
                 <!--abre el formulario (envia los datos ingresados
                 a la ruta de reposts.store
                 -->
-                <form method="POST" action="{{ route('reports.store') }}">
-                    <!--
-                    Al presionar "Enviar reporte",
+                <form method="POST"
+                    action="{{ route('reports.store') }}"
+                    enctype="multipart/form-data">
+                    <!-- Al presionar "Enviar reporte",
                     los datos serán enviados al método store()
-                    del ReportController.
-                    -->
+                    del ReportController. 
+                    El atributo "enctype" permite enviar archivos -->
                     @csrf
                     <!--
                     Genera un token de seguridad.
@@ -147,6 +148,31 @@
                         Leaflet es una librería gratuita de mapas
                         basada en OpenStreetMap.
                         -->
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-2 font-medium">
+                            Fotografías del incendio (máximo 3)
+                        </label>
+
+                        <input
+                            type="file"
+                            name="images[]"
+                            multiple
+                            accept="image/png,image/jpeg"
+                            capture="environment"
+                            class="w-full border rounded p-2"
+                        >
+                        <!-- multiple permite seleccionar varios archivos
+                         accept hace que solo se acepten imagenes
+                         capture es para abrir la cámara -->
+                        <p class="text-sm text-gray-500 mt-1">
+                            Puedes seleccionar hasta 3 imágenes.
+                        </p>
+
+                        @error('images')
+                            <p class="text-red-600 text-sm">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded">
