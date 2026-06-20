@@ -1,4 +1,14 @@
 <?php
+
+if (!file_exists(database_path('database.sqlite'))) {
+    touch(database_path('database.sqlite'));
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+    } catch (\Exception $e) {
+        // Evita errores si se ejecuta al mismo tiempo
+    }
+}
+
 //define a que url puede ir el usuario
 // Importa las herramientas necesarias de Laravel para crear rutas
 use Illuminate\Support\Facades\Route;
