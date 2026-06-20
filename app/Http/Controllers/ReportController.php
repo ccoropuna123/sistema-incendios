@@ -7,6 +7,9 @@ namespace App\Http\Controllers;
 //sin escribir su ruta completa
 use App\Models\Report;
 
+// Modelo que representa la tabla de imagenes de reportes
+use App\Models\ReportImage;
+
 // Permite recibir los datos enviados desde formularios
 //representa el formulario que el usuario envio
 use Illuminate\Http\Request;
@@ -68,6 +71,12 @@ class ReportController extends Controller
 
             // Solo se aceptan estos dos valores
             'location_type' => 'required|in:auto,manual',
+
+            // Arreglo de imágenes (máximo 3)
+            'images' => 'nullable|array|max:3',
+
+            // Cada archivo debe ser una imagen JPG o PNG
+            'images.*' => 'image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
         /*
@@ -100,6 +109,39 @@ class ReportController extends Controller
             // Estado inicial del reporte
             'status' => 'enviado',
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Guardar imágenes del reporte
+        |--------------------------------------------------------------------------
+        |
+        | Si el usuario adjuntó fotografías, se almacenan
+        | en la carpeta storage/app/public/reports
+        |
+        | En la base de datos solo se guarda la ruta.
+        |
+        */
+
+        if ($request->hasFile('images')) {
+
+            foreach ($request->file('images') as $image) {
+
+                // Guarda la imagen físicamente
+                $path = $image->store(
+                    'reports',
+                    'public'
+                );
+
+                // Guarda la ruta en SQLite
+                ReportImage::create([
+
+                    'report_id' => $reporte->id,
+
+                    'image_path' => $path
+
+                ]);
+            }
+        }
 
         $reporteMensaje = " *REPORTE DE INCENDIO ENVIADO* \n\n" .
                         "📝 *Descripción:* " . ($reporte->description ?? 'Sin descripción') . "\n" .
