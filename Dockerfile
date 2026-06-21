@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Instalar extensiones de PHP necesarias para Laravel
+# Instalar extensiones de PHP y Node.js con npm
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -8,6 +8,10 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     git \
+    curl \
+    && curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodesource-repo \
+    && apt-get install -y nodejs \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql
 
@@ -25,6 +29,9 @@ COPY . /var/www/html
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+# Instalar dependencias de Node y compilar los estilos de Vite
+RUN npm install && npm run build
 
 # Configurar permisos para Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
