@@ -1,15 +1,6 @@
-# === ETAPA 1: Compilar estilos con Node ===
-FROM node:18-alpine AS frontend
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-# === ETAPA 2: Servidor Apache con PHP ===
 FROM php:8.2-apache
 
-# Instalar extensiones de PHP necesarias para Laravel
+# Instalar extensiones de PHP y Node.js para compilar Vite en un solo paso
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -17,6 +8,9 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     git \
+    curl \
+    && curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql
 
@@ -28,20 +22,20 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Copiar el proyecto al contenedor
+# Copiar todo el proyecto
 COPY . /var/www/html
-
-# Traer los archivos compilados por Vite desde la Etapa 1
-COPY --from=frontend /app/public/build /var/www/html/public/build
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-RUN php artisan view:clear && php artisan config:clear
+# Forzar la instalación de Node y compilación de Vite directamente aquí
+RUN npm install
+RUN npm run build
 
-# Configurar permisos para Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Configurar permisos para Laravel y la nueva carpeta build
+RUN mkdir -p /var/www/html/public/build \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/build
 
 # Crear un archivo de SQLite vacío en caso de que no exista
 RUN touch /var/www/html/database/database.sqlite \
